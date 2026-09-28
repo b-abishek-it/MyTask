@@ -1,0 +1,285 @@
+.container {
+  display: flex;
+  height: 100%;
+  gap: 24px;
+}
+
+.historySidebar {
+  width: 300px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.monthSelector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.monthSelector h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.navBtn {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  color: var(--color-text);
+}
+
+.navBtn:hover {
+  background: var(--color-border);
+}
+
+.loadingSidebar, .emptySidebar {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-text-light);
+  font-size: 14px;
+}
+
+.dayList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dayBtn {
+  width: 100%;
+  text-align: left;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.dayBtn:hover {
+  border-color: rgba(0, 91, 150, 0.3);
+  transform: translateX(2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.dayBtnActive {
+  background: rgba(0, 91, 150, 0.05);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.dayInfo {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dayDate {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.dayStats {
+  font-size: 12px;
+  color: var(--color-text-light);
+}
+
+.progressBar {
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #34d399, #10b981);
+  border-radius: 3px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Detail Area */
+.workDetail {
+  flex: 1;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.emptyDetail, .loadingDetail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+.detailHeader {
+  padding: 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.detailHeader h2 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.headerStats {
+  display: flex;
+  gap: 24px;
+}
+
+.headerStat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.detailContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.tasksSection h3, .timelineSection h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.tasksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.taskCard {
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-secondary);
+}
+
+.taskCard h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.taskStatus {
+  font-size: 11px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--color-text-light);
+}
+
+.emptyTimeline {
+  color: var(--color-text-light);
+  font-style: italic;
+  font-size: 14px;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  padding-left: 12px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 0;
+  left: 16px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--color-primary), rgba(0, 91, 150, 0.2));
+}
+
+.timelineItem {
+  display: flex;
+  gap: 16px;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.timelineDot {
+  width: 12px;
+  height: 12px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  margin-top: 6px;
+  z-index: 1;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.8), 0 0 0 1px var(--color-primary);
+}
+
+.timelineItem:first-child .timelineDot {
+  animation: pulseToday 2s infinite;
+}
+
+.timelineInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--color-bg-secondary);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  flex: 1;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.timelineItem:hover .timelineInfo {
+  background: var(--color-bg);
+  border-color: rgba(0, 91, 150, 0.2);
+  box-shadow: var(--shadow-sm);
+  transform: translateX(4px);
+}
+
+.timelineTime {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.timelineText {
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.timelineText em {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--color-text-light);
+}

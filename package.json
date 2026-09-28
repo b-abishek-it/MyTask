@@ -1,0 +1,11 @@
+{
+  "name": "mytask",
+  "version": "1.0.0",
+  "description": "MyTask - Personal and Work Task Management System",
+  "scripts": {
+    "dev": "npx concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "install:all": "npm install concurrently && cd frontend && npm install && cd ../backend && npm install"
+  }
+}

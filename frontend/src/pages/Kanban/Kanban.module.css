@@ -1,0 +1,668 @@
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-light);
+}
+
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.topBarLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.taskCount {
+  font-size: 14px;
+  color: var(--color-text-light);
+}
+
+.topBarRight {
+  display: flex;
+  gap: 12px;
+}
+
+.filterButton, .createButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filterButton {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.filterButton:hover {
+  background-color: var(--color-border);
+}
+
+.createButton {
+  background-color: var(--color-primary);
+  border: none;
+  color: white;
+}
+
+.createButton:hover {
+  background-color: #004a7a;
+}
+
+.filterBar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 12px;
+  background-color: var(--color-bg);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.filterSelect {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.clearFilters {
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-light);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.clearFilters:hover {
+  text-decoration: underline;
+  color: var(--color-text);
+}
+
+/* Board & Columns */
+.board {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+.column {
+  flex: 1;
+  min-width: 260px;
+  max-width: 300px;
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition: all var(--transition-smooth);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.columnOver {
+  background-color: rgba(0, 91, 150, 0.05);
+  border-color: var(--color-primary);
+}
+
+.columnHeader {
+  padding: 16px;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.columnTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.columnDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.columnTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+  flex: 1;
+  letter-spacing: -0.3px;
+}
+
+.columnCount {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-light);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.columnContent {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Task Card */
+.taskCard {
+  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  display: flex;
+  cursor: grab;
+  overflow: hidden;
+  transition: all var(--transition-smooth);
+  position: relative;
+}
+
+.taskCard:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: rgba(0, 91, 150, 0.2);
+}
+
+.taskCard:active {
+  cursor: grabbing;
+}
+
+.taskCardDragging {
+  opacity: 0.9;
+  box-shadow: var(--shadow-xl);
+  transform: rotate(3deg) scale(1.02);
+  border-color: var(--color-primary);
+  z-index: 100;
+}
+
+.taskCardPriorityBar {
+  width: 5px;
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, currentColor, transparent 80%);
+}
+
+.taskCardContent {
+  padding: 8px 10px;
+  flex: 1;
+}
+
+.taskCardTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin: 0 0 6px 0;
+  line-height: 1.4;
+}
+
+.taskCardProject {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--color-text-light);
+  background-color: var(--color-bg-secondary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.taskCardMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.taskCardPriority {
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.taskCardDate {
+  color: var(--color-text-light);
+}
+
+.taskCardDue {
+  color: var(--color-text-light);
+}
+
+.taskCardDue.overdue {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.overdueTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #fef2f2;
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.taskCardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-bg-secondary);
+}
+
+.taskCardUpdated {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-light);
+  font-size: 11px;
+}
+
+/* Inline Create Button */
+.inlineCreateBtn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-light);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.inlineCreateBtn:hover {
+  background: rgba(0, 91, 150, 0.05);
+  color: var(--color-primary);
+}
+
+/* Modals & Panels */
+.modalOverlay, .panelOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  z-index: 1000;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modalOverlay {
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.modal {
+  background-color: var(--color-bg);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  animation: popIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.panelOverlay {
+  justify-content: flex-end;
+}
+
+.panel {
+  background-color: var(--color-bg);
+  width: 100%;
+  max-width: 450px;
+  height: 100%;
+  box-shadow: -5px 0 25px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader, .panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modalHeader h2, .panelHeader h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.panelHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modalCloseBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-light);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.modalCloseBtn:hover {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text);
+}
+
+.deleteBtn {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.deleteBtn:hover {
+  background-color: #fef2f2;
+}
+
+.modalForm, .panelBody {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modalField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.modalField label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.modalField input, .modalField textarea, .modalField select {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.modalField input:focus, .modalField textarea:focus, .modalField select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(0, 91, 150, 0.1);
+}
+
+.modalRow {
+  display: flex;
+  gap: 16px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.cancelBtn {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cancelBtn:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+.submitBtn {
+  padding: 8px 16px;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.submitBtn:hover {
+  background-color: #004a7a;
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.historySection {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+}
+
+.historyTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: var(--color-text);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: 2px;
+  background-color: var(--color-border);
+}
+
+.timelineItem {
+  display: flex;
+  gap: 12px;
+  position: relative;
+}
+
+.timelineDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  margin-top: 4px;
+  z-index: 1;
+}
+
+.timelineContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timelineStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.timelineDate {
+  font-size: 11px;
+  color: var(--color-text-light);
+}
+
+.customSelect {
+  position: relative;
+  width: 100%;
+}
+
+.customSelectValue {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.customSelectMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 1000;
+  max-height: 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+.customSelectSearch {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.customSelectSearch input {
+  border: none !important;
+  padding: 0 !important;
+  width: 100%;
+  outline: none;
+  font-size: 13px;
+  background: transparent;
+  box-shadow: none !important;
+}
+
+.customSelectList {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.customSelectOption {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.customSelectOption:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+.customSelectCreateOption {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--color-border);
+  background-color: rgba(0, 91, 150, 0.05);
+}
+
+.customSelectCreateOption:hover {
+  background-color: rgba(0, 91, 150, 0.1);
+}
