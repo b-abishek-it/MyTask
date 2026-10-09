@@ -35,7 +35,7 @@ export const ClockWidget = () => {
   return (
     <div className={styles.widgetContainer}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Value of Time</h2>
+        <h2 className={styles.title}>Life Line</h2>
       </div>
       <div className={styles.content}>
         <div className={styles.digitalDisplay}>
@@ -54,21 +54,21 @@ export const ClockWidget = () => {
               className={`${styles.hand} ${styles.minuteHand}`}
               style={{ transform: `rotate(${minuteDeg}deg)` }}
             ></div>
-            <div 
-              className={`${styles.hand} ${styles.secondHand}`} 
+            <div
+              className={`${styles.hand} ${styles.secondHand}`}
               style={{ transform: `rotate(${secondDeg}deg)` }}
             ></div>
-            
+
             {[...Array(60)].map((_, i) => (
-              <div 
-                key={i} 
-                className={styles.tickWrapper} 
+              <div
+                key={i}
+                className={styles.tickWrapper}
                 style={{ transform: `rotate(${i * 6}deg)` }}
               >
                 <div className={`${styles.tick} ${i % 5 === 0 ? styles.hourTick : styles.minuteTick}`}></div>
               </div>
             ))}
-            
+
             <div className={`${styles.marker} ${styles.marker12}`}>12</div>
             <div className={`${styles.marker} ${styles.marker3}`}>3</div>
             <div className={`${styles.marker} ${styles.marker6}`}>6</div>

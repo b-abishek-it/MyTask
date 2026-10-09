@@ -8,6 +8,18 @@ const taskRoutes = new Hono();
 // Generate UUID
 const genId = () => crypto.randomUUID();
 
+// Validation constants
+const VALID_STATUSES = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE'];
+const VALID_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH'];
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+const validateDate = (dateStr: string | undefined | null): boolean => {
+  if (!dateStr) return true; // null/undefined is allowed
+  if (!DATE_REGEX.test(dateStr)) return false;
+  const d = new Date(dateStr);
+  return !isNaN(d.getTime());
+};
+
 // GET /tasks - List all tasks (filterable)
 taskRoutes.get('/', async (c) => {
   const db = drizzle(c.env.DB);
@@ -93,6 +105,19 @@ taskRoutes.post('/', async (c) => {
   const id = genId();
   const now = new Date();
 
+  if (!body.title?.trim()) {
+    return c.json({ success: false, message: 'Title is required' }, 400);
+  }
+  if (body.status && !VALID_STATUSES.includes(body.status)) {
+    return c.json({ success: false, message: 'Invalid status' }, 400);
+  }
+  if (body.priority && !VALID_PRIORITIES.includes(body.priority)) {
+    return c.json({ success: false, message: 'Invalid priority' }, 400);
+  }
+  if (!validateDate(body.taskDate) || !validateDate(body.dueDate)) {
+    return c.json({ success: false, message: 'Invalid date format' }, 400);
+  }
+
   await db.insert(tasks).values({
     id,
     userId: body.userId || 'user-001',
@@ -128,6 +153,16 @@ taskRoutes.put('/:id', async (c) => {
   const body = await c.req.json();
   const now = new Date();
 
+  if (body.title !== undefined && !body.title.trim()) {
+    return c.json({ success: false, message: 'Title cannot be empty' }, 400);
+  }
+  if (body.priority && !VALID_PRIORITIES.includes(body.priority)) {
+    return c.json({ success: false, message: 'Invalid priority' }, 400);
+  }
+  if (!validateDate(body.taskDate) || !validateDate(body.dueDate)) {
+    return c.json({ success: false, message: 'Invalid date format' }, 400);
+  }
+
   await db.update(tasks).set({
     title: body.title,
     description: body.description,
@@ -159,6 +194,10 @@ taskRoutes.patch('/:id/status', async (c) => {
   const body = await c.req.json();
   const now = new Date();
 
+  if (!body.status || !VALID_STATUSES.includes(body.status)) {
+    return c.json({ success: false, message: 'Invalid status' }, 400);
+  }
+
   // Get current status
   const [current] = await db.select({ status: tasks.status }).from(tasks).where(eq(tasks.id, id));
   if (!current) return c.json({ success: false, message: 'Task not found' }, 404);
@@ -189,6 +228,10 @@ taskRoutes.patch('/:id/priority', async (c) => {
   const db = drizzle(c.env.DB);
   const id = c.req.param('id');
   const body = await c.req.json();
+
+  if (!body.priority || !VALID_PRIORITIES.includes(body.priority)) {
+    return c.json({ success: false, message: 'Invalid priority' }, 400);
+  }
 
   await db.update(tasks).set({
     priority: body.priority,

@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
@@ -42,7 +42,9 @@ export const tasks = sqliteTable('tasks', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }),
   deletedAt: integer('deleted_at', { mode: 'timestamp' }),
-});
+}, (t) => ({
+  dateIdx: index('idx_tasks_workspace_date').on(t.workspaceId, t.taskDate, t.deletedAt),
+}));
 
 export const taskHistory = sqliteTable('task_history', {
   id: text('id').primaryKey(),

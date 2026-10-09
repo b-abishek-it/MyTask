@@ -1,0 +1,1 @@
+CREATE INDEX `idx_tasks_workspace_date` ON `tasks` (`workspace_id`,`task_date`,`deleted_at`);

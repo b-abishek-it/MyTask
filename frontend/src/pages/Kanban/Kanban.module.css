@@ -110,7 +110,7 @@
 /* Board & Columns */
 .board {
   display: flex;
-  gap: 24px;
+  gap: 16px;
   flex: 1;
   overflow-x: auto;
   padding-bottom: 16px;
@@ -118,8 +118,8 @@
 
 .column {
   flex: 1;
-  min-width: 260px;
-  max-width: 300px;
+  min-width: 270px;
+  max-width: 340px;
   background-color: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -219,8 +219,11 @@
 }
 
 .taskCardContent {
-  padding: 8px 10px;
+  padding: 12px;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .taskCardTitle {
@@ -229,22 +232,27 @@
   color: var(--color-text);
   margin: 0 0 6px 0;
   line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .taskCardProject {
-  display: inline-block;
+  display: inline-flex;
+  align-self: flex-start;
   font-size: 11px;
   color: var(--color-text-light);
   background-color: var(--color-bg-secondary);
   padding: 2px 6px;
   border-radius: 4px;
   margin-bottom: 8px;
+  word-wrap: break-word;
 }
 
 .taskCardMeta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   font-size: 12px;
   margin-bottom: 8px;
 }
@@ -256,14 +264,21 @@
 
 .taskCardDate {
   color: var(--color-text-light);
+  white-space: nowrap;
 }
 
 .taskCardDue {
   color: var(--color-text-light);
+  white-space: nowrap;
 }
 
 .taskCardDue.overdue {
   color: #ef4444;
+  font-weight: 500;
+}
+
+.taskCardDue.dueSoon {
+  color: #f59e0b;
   font-weight: 500;
 }
 
@@ -280,11 +295,24 @@
   margin-bottom: 8px;
 }
 
+.dueSoonTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #fffbeb;
+  color: #f59e0b;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
 .taskCardFooter {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  margin-top: auto;
   padding-top: 8px;
   border-top: 1px solid var(--color-bg-secondary);
 }
@@ -665,4 +693,159 @@
 
 .customSelectCreateOption:hover {
   background-color: rgba(0, 91, 150, 0.1);
+}
+
+/* Kanban Dropdown */
+.dropdownContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.iconButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-light);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconButton:hover {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 150px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+  margin-top: 4px;
+}
+
+.dropdownItem {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 13px;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.dropdownItem:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+.dropdownItem.danger {
+  color: #ef4444;
+}
+
+.dropdownItem.danger:hover {
+  background-color: #fef2f2;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.cardHeader h4 {
+  margin: 0;
+}
+
+/* Dropdown active state */
+.dropdownItemActive {
+  background-color: rgba(0, 91, 150, 0.08);
+  color: var(--color-primary);
+  font-weight: 500;
+  cursor: default;
+}
+
+.dropdownItemActive:hover {
+  background-color: rgba(0, 91, 150, 0.08);
+}
+
+/* Skeleton loader */
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+.skeletonTitle {
+  height: 16px;
+  width: 80px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonCard {
+  height: 100px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Error bar */
+.errorBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  color: #ef4444;
+  font-size: 14px;
+}
+
+.retryBtn {
+  padding: 4px 12px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.retryBtn:hover {
+  background-color: #dc2626;
+}
+
+/* Empty column state */
+.emptyColumn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  color: var(--color-text-light);
+  font-size: 13px;
+  font-style: italic;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  opacity: 0.7;
 }

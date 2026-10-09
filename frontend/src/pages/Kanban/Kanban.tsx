@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -17,8 +17,8 @@ import { KanbanColumn } from './KanbanColumn';
 import { TaskCard } from './TaskCard';
 import { CreateTaskModal } from './CreateTaskModal';
 import { TaskDetailPanel } from './TaskDetailPanel';
-import { Plus, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { Plus, Filter, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { useSearchParams, Link } from 'react-router-dom';
 import styles from './Kanban.module.css';
 
 const COLUMNS: { id: TaskStatus; title: string }[] = [
@@ -49,6 +49,7 @@ export const Kanban = () => {
   const [filterProject, setFilterProject] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -56,14 +57,16 @@ export const Kanban = () => {
 
   const fetchTasks = useCallback(async () => {
     if (!activeWorkspace) return;
+    setFetchError(null);
     try {
-      const params: any = { workspace_id: activeWorkspace.id };
+      const params: any = { workspace_id: activeWorkspace.id, task_date: dateParam };
       if (filterPriority) params.priority = filterPriority;
       if (filterProject) params.project_id = filterProject;
       const data = await tasksApi.list(params);
-      setTasks((data.tasks || []).filter((t: Task) => t.taskDate === dateParam));
+      setTasks(data.tasks || []);
     } catch (err) {
       console.error('Failed to fetch tasks:', err);
+      setFetchError('Failed to load tasks. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -84,8 +87,18 @@ export const Kanban = () => {
     fetchProjects();
   }, [fetchTasks, fetchProjects]);
 
-  const getColumnTasks = (status: TaskStatus) =>
-    tasks.filter((t) => t.status === status);
+  const getColumnTasks = useMemo(() => {
+    const grouped: Record<TaskStatus, Task[]> = {
+      TODO: [],
+      IN_PROGRESS: [],
+      IN_REVIEW: [],
+      DONE: [],
+    };
+    tasks.forEach((t) => {
+      if (grouped[t.status]) grouped[t.status].push(t);
+    });
+    return grouped;
+  }, [tasks]);
 
   const handleDragStart = (event: DragStartEvent) => {
     const task = tasks.find((t) => t.id === event.active.id);
@@ -101,6 +114,26 @@ export const Kanban = () => {
     const newStatus = over.id as TaskStatus;
     const task = tasks.find((t) => t.id === taskId);
 
+    if (!task || task.status === newStatus) return;
+
+    // Optimistic update
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
+    );
+
+    try {
+      await tasksApi.updateStatus(taskId, newStatus);
+    } catch (err) {
+      // Revert on error
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? { ...t, status: task.status } : t))
+      );
+      console.error('Failed to update status:', err);
+    }
+  };
+
+  const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+    const task = tasks.find((t) => t.id === taskId);
     if (!task || task.status === newStatus) return;
 
     // Optimistic update
@@ -147,7 +180,27 @@ export const Kanban = () => {
   };
 
   if (isLoading) {
-    return <div className={styles.loading}>Loading tasks...</div>;
+    return (
+      <div className={styles.container}>
+        <div className={styles.board}>
+          {COLUMNS.map((col) => (
+            <div key={col.id} className={styles.column}>
+              <div className={styles.columnHeader}>
+                <div className={styles.columnTitleRow}>
+                  <span className={styles.columnDot} style={{ backgroundColor: '#e5e7eb' }} />
+                  <div className={styles.skeletonTitle} />
+                </div>
+              </div>
+              <div className={styles.columnContent}>
+                {[1, 2].map((i) => (
+                  <div key={i} className={styles.skeletonCard} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -163,6 +216,9 @@ export const Kanban = () => {
           <span className={styles.taskCount}>{tasks.length} tasks</span>
         </div>
         <div className={styles.topBarRight}>
+          <Link to="/calendar" className={styles.filterButton}>
+            <Calendar size={16} /> Calendar
+          </Link>
           <button
             className={styles.filterButton}
             onClick={() => setShowFilters(!showFilters)}
@@ -177,6 +233,13 @@ export const Kanban = () => {
           </button>
         </div>
       </div>
+
+      {fetchError && (
+        <div className={styles.errorBar}>
+          <span>{fetchError}</span>
+          <button onClick={fetchTasks} className={styles.retryBtn}>Retry</button>
+        </div>
+      )}
 
       {showFilters && (
         <div className={styles.filterBar}>
@@ -217,7 +280,7 @@ export const Kanban = () => {
       >
         <div className={styles.board}>
           {COLUMNS.map((col) => {
-            const columnTasks = getColumnTasks(col.id);
+            const columnTasks = getColumnTasks[col.id];
             return (
               <KanbanColumn 
                 key={col.id} 
@@ -227,8 +290,18 @@ export const Kanban = () => {
                 onCreateTask={col.id === 'TODO' ? () => setShowCreateModal(true) : undefined}
               >
                 <SortableContext items={columnTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+                  {columnTasks.length === 0 && (
+                    <div className={styles.emptyColumn}>
+                      <span>No tasks</span>
+                    </div>
+                  )}
                   {columnTasks.map((task) => (
-                    <TaskCard key={task.id} task={task} onClick={() => setSelectedTask(task)} />
+                    <TaskCard 
+                      key={task.id} 
+                      task={task} 
+                      onClick={() => setSelectedTask(task)} 
+                      onStatusChange={handleStatusChange}
+                    />
                   ))}
                 </SortableContext>
               </KanbanColumn>

@@ -152,8 +152,8 @@ export const CreateTaskModal = ({ projects, workspaceId, onClose, onCreated, def
           </div>
           <div className={styles.modalRow}>
             <div className={styles.modalField}>
-              <label>Task Date</label>
-              <input type="date" value={taskDate} onChange={(e) => setTaskDate(e.target.value)} />
+              <label>Task Date *</label>
+              <input type="date" value={taskDate} onChange={(e) => setTaskDate(e.target.value)} required />
             </div>
             <div className={styles.modalField}>
               <label>Due Date</label>
