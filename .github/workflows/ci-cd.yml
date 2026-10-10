@@ -97,4 +97,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ env.CLEAN_ACCOUNT_ID }}
-          command: pages deploy ./frontend/dist --project-name=mytask-frontend
+          command: pages deploy dist --project-name=mytask-frontend
+          workingDirectory: frontend
