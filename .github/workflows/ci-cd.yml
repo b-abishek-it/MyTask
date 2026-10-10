@@ -65,7 +65,13 @@ jobs:
         with:
           node-version: '22'
 
-      # ----- 1. DEPLOY BACKEND (Cloudflare Workers) -----
+      # ----- 1. PREPARE SECRETS -----
+      # Automatically trims any accidental spaces or newlines the user pasted in GitHub Secrets
+      - name: Clean Cloudflare Account ID
+        run: |
+          echo "CLEAN_ACCOUNT_ID=$(echo '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}' | tr -d '\n\r ')" >> $GITHUB_ENV
+
+      # ----- 2. DEPLOY BACKEND (Cloudflare Workers) -----
       - name: Install Backend Dependencies
         working-directory: ./backend
         run: npm ci || npm install
@@ -75,7 +81,7 @@ jobs:
         run: npm run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ env.CLEAN_ACCOUNT_ID }}
 
       # ----- 2. DEPLOY FRONTEND (Cloudflare Pages) -----
       - name: Install Frontend Dependencies
@@ -90,5 +96,5 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          accountId: ${{ env.CLEAN_ACCOUNT_ID }}
           command: pages deploy ./frontend/dist --project-name=mytask-frontend
