@@ -93,9 +93,8 @@ jobs:
         run: npm run build
 
       - name: Deploy Frontend to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ env.CLEAN_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=mytask-frontend
-          workingDirectory: frontend
+        working-directory: ./frontend
+        run: npx wrangler pages deploy dist --project-name=mytask-frontend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ env.CLEAN_ACCOUNT_ID }}
