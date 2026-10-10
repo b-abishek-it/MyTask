@@ -7,7 +7,7 @@
     {
       "binding": "DB",
       "database_name": "mytask-db",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "980253e7-3dc7-47e6-b6cc-d299b61e9875",
       "migrations_dir": "drizzle"
     }
   ],
