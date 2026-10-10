@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, memo } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Task, TaskStatus } from '../../types';
-import { Clock, AlertTriangle, MoreVertical, ArrowRight, Check } from 'lucide-react';
+import { Clock, AlertTriangle, MoreVertical, ArrowRight } from 'lucide-react';
 import styles from './Kanban.module.css';
 
 interface TaskCardProps {
@@ -87,6 +87,7 @@ export const TaskCard = memo(({ task, isDragging, onClick, onStatusChange }: Tas
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isSortableDragging ? 0.3 : 1,
+    zIndex: isSortableDragging ? 100 : (isDropdownOpen ? 50 : 1),
   };
 
   const overdue = isOverdue(task);
@@ -131,15 +132,13 @@ export const TaskCard = memo(({ task, isDragging, onClick, onStatusChange }: Tas
             </button>
             {isDropdownOpen && (
               <div className={styles.dropdownMenu}>
-                {STATUS_OPTIONS.map((opt) => (
+                {STATUS_OPTIONS.filter(opt => opt.id !== task.status).map((opt) => (
                   <button
                     key={opt.id}
-                    className={`${styles.dropdownItem} ${opt.id === task.status ? styles.dropdownItemActive : ''}`}
+                    className={styles.dropdownItem}
                     onClick={(e) => handleStatusSelect(e, opt.id)}
-                    disabled={opt.id === task.status}
                   >
-                    {opt.id === task.status ? <Check size={14} /> : <ArrowRight size={14} />}
-                    {opt.id === task.status ? opt.label : `Move to ${opt.label}`}
+                    <ArrowRight size={14} /> Move to {opt.label}
                   </button>
                 ))}
               </div>

@@ -1,9 +1,10 @@
+import type { AppEnv } from '../index';
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
 import { tasks, notes } from '../db/schema';
 import { eq, isNotNull } from 'drizzle-orm';
 
-const trashRoutes = new Hono();
+const trashRoutes = new Hono<AppEnv>();
 
 // GET /trash/tasks
 trashRoutes.get('/tasks', async (c) => {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { tasksApi, projectsApi } from '../../services/api';
-import { Project } from '../../types';
+import { Project, TaskStatus } from '../../types';
 import { X, Search, Plus, ChevronDown } from 'lucide-react';
 import styles from './Kanban.module.css';
 
@@ -10,9 +10,10 @@ interface CreateTaskModalProps {
   onClose: () => void;
   onCreated: () => void;
   defaultDate?: string;
+  defaultStatus?: TaskStatus;
 }
 
-export const CreateTaskModal = ({ projects, workspaceId, onClose, onCreated, defaultDate }: CreateTaskModalProps) => {
+export const CreateTaskModal = ({ projects, workspaceId, onClose, onCreated, defaultDate, defaultStatus }: CreateTaskModalProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('MEDIUM');
@@ -62,7 +63,7 @@ export const CreateTaskModal = ({ projects, workspaceId, onClose, onCreated, def
         taskDate: taskDate || null,
         dueDate: dueDate || null,
         workspaceId,
-        status: 'TODO',
+        status: defaultStatus || 'TODO',
       });
       onCreated();
     } catch (err) {

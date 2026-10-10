@@ -1,9 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWorkspace } from '../../features/workspace/WorkspaceContext';
-import { workApi } from '../../services/api';
+import { workApi, tasksApi } from '../../services/api';
 import { Task, TaskHistory, DailyWorkSummary } from '../../types';
-import { ChevronLeft, ChevronRight, CheckCircle, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle2, Circle, Clock, CheckCircle, Tag, Calendar as CalendarIcon } from 'lucide-react';
+import { TaskDetailPanel } from '../Kanban/TaskDetailPanel';
 import styles from './MyWork.module.css';
+
+const PRIORITY_COLORS: Record<string, string> = {
+  HIGH: '#ef4444',
+  MEDIUM: '#f59e0b',
+  LOW: '#22c55e',
+};
 
 export const MyWork = () => {
   const { activeWorkspace } = useWorkspace();
@@ -15,6 +22,7 @@ export const MyWork = () => {
   const [history, setHistory] = useState<TaskHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   const fetchWorkDays = useCallback(async () => {
     if (!activeWorkspace) return;
@@ -22,41 +30,93 @@ export const MyWork = () => {
     try {
       const data = await workApi.getSummary(monthStr, activeWorkspace.id);
       setWorkDays(data.days || []);
-      if (data.days?.length > 0 && !selectedDate) {
-        setSelectedDate(data.days[0].date);
-      }
+      setSelectedDate((prevSelectedDate) => {
+        if (data.days?.length > 0) {
+          if (!prevSelectedDate || !data.days.find((d: any) => d.date === prevSelectedDate)) {
+            return data.days[0].date;
+          }
+          return prevSelectedDate;
+        }
+        return null;
+      });
     } catch (err) {
       console.error('Failed to fetch work summary', err);
     } finally {
       setIsLoading(false);
     }
-  }, [activeWorkspace, currentMonth, selectedDate]);
+  }, [activeWorkspace, currentMonth]);
 
   useEffect(() => {
     fetchWorkDays();
   }, [fetchWorkDays]);
 
-  useEffect(() => {
-    if (!selectedDate || !activeWorkspace) return;
-    const fetchDailyDetails = async () => {
-      setIsDetailLoading(true);
-      try {
-        const data = await workApi.getDate(selectedDate, activeWorkspace.id);
-        setTasks(data.tasks || []);
-        setHistory(data.history || []);
-      } catch (err) {
-        console.error('Failed to fetch daily details', err);
-      } finally {
-        setIsDetailLoading(false);
-      }
-    };
-    fetchDailyDetails();
+  const fetchDailyDetails = useCallback(async () => {
+    if (!selectedDate || !activeWorkspace) {
+      setTasks([]);
+      setHistory([]);
+      return;
+    }
+    setIsDetailLoading(true);
+    try {
+      const data = await workApi.getDate(selectedDate, activeWorkspace.id);
+      setTasks(data.tasks || []);
+      setHistory(data.history || []);
+    } catch (err) {
+      console.error('Failed to fetch daily details', err);
+    } finally {
+      setIsDetailLoading(false);
+    }
   }, [selectedDate, activeWorkspace]);
+
+  useEffect(() => {
+    fetchDailyDetails();
+  }, [fetchDailyDetails]);
 
   const prevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   const nextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
 
   const formatStatus = (status: string) => status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+  const toggleTaskStatus = async (e: React.MouseEvent, task: Task) => {
+    e.stopPropagation();
+    const newStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
+    
+    // Optimistic update
+    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t));
+    
+    try {
+      await tasksApi.updateStatus(task.id, newStatus);
+      fetchDailyDetails(); // refresh details and history
+      fetchWorkDays(); // refresh progress bar on left
+    } catch (err) {
+      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: task.status } : t));
+    }
+  };
+
+  const renderTaskRow = (task: Task) => (
+    <div key={task.id} className={styles.taskRow} onClick={() => setActiveTask(task)}>
+      <div className={`${styles.checkbox} ${task.status === 'DONE' ? styles.checkboxDone : ''}`} onClick={(e) => toggleTaskStatus(e, task)}>
+        {task.status === 'DONE' ? <CheckCircle2 size={20} /> : <Circle size={20} />}
+      </div>
+      <div className={styles.taskTitle}>{task.title}</div>
+      
+      {task.projectName && (
+        <div className={styles.taskProject}>
+          <Tag size={12} /> {task.projectName}
+        </div>
+      )}
+      
+      <div className={styles.taskMeta}>
+        <div className={styles.taskDate}>
+          <CalendarIcon size={14} /> 
+          {task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'No date'}
+        </div>
+        <div className={styles.taskPriority} style={{ color: PRIORITY_COLORS[task.priority] }}>
+          {task.priority}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className={styles.container}>
@@ -68,9 +128,12 @@ export const MyWork = () => {
         </div>
         
         {isLoading ? (
-          <div className={styles.loadingSidebar}>Loading history...</div>
+          <div className={styles.emptySidebar}>Loading history...</div>
         ) : workDays.length === 0 ? (
-          <div className={styles.emptySidebar}>No work recorded this month.</div>
+          <div className={styles.emptySidebar}>
+            <Clock size={32} style={{ opacity: 0.3, marginBottom: 12 }} />
+            No work recorded this month.
+          </div>
         ) : (
           <div className={styles.dayList}>
             {workDays.map((day) => (
@@ -101,13 +164,18 @@ export const MyWork = () => {
 
       <div className={styles.workDetail}>
         {!selectedDate ? (
-          <div className={styles.emptyDetail}>Select a date to view work history.</div>
+          <div className={styles.emptyDetail}>
+            <CheckCircle size={48} className={styles.emptyStateIcon} />
+            <p>Select a date to view your work history.</p>
+          </div>
         ) : isDetailLoading ? (
           <div className={styles.loadingDetail}>Loading details...</div>
         ) : (
           <>
             <div className={styles.detailHeader}>
-              <h2>Daily Summary: {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</h2>
+              <h2 className={styles.detailTitle}>
+                {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+              </h2>
               <div className={styles.headerStats}>
                 <div className={styles.headerStat}>
                   <CheckCircle size={16} color="#22c55e" />
@@ -122,21 +190,20 @@ export const MyWork = () => {
 
             <div className={styles.detailContent}>
               <div className={styles.tasksSection}>
-                <h3>Tasks for this day</h3>
-                <div className={styles.tasksGrid}>
-                  {tasks.map(task => (
-                    <div key={task.id} className={styles.taskCard}>
-                      <h4>{task.title}</h4>
-                      <span className={styles.taskStatus}>{formatStatus(task.status)}</span>
-                    </div>
-                  ))}
-                </div>
+                <h3 className={styles.sectionTitle}>Tasks for this day</h3>
+                {tasks.length === 0 ? (
+                  <p className={styles.emptyText}>No tasks assigned to this date.</p>
+                ) : (
+                  <div className={styles.tasksList}>
+                    {tasks.map(renderTaskRow)}
+                  </div>
+                )}
               </div>
 
               <div className={styles.timelineSection}>
-                <h3>Activity Timeline</h3>
+                <h3 className={styles.sectionTitle}>Activity Timeline</h3>
                 {history.length === 0 ? (
-                  <p className={styles.emptyTimeline}>No status changes recorded on this day.</p>
+                  <p className={styles.emptyText}>No status changes recorded on this day.</p>
                 ) : (
                   <div className={styles.timeline}>
                     {history.map(h => {
@@ -164,6 +231,24 @@ export const MyWork = () => {
           </>
         )}
       </div>
+
+      {activeTask && (
+        <TaskDetailPanel
+          task={activeTask}
+          projects={[]}
+          onClose={() => setActiveTask(null)}
+          onUpdated={() => {
+            setActiveTask(null);
+            fetchDailyDetails();
+            fetchWorkDays();
+          }}
+          onDeleted={() => {
+            setActiveTask(null);
+            fetchDailyDetails();
+            fetchWorkDays();
+          }}
+        />
+      )}
     </div>
   );
 };

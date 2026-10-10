@@ -97,3 +97,13 @@ export const reminders = sqliteTable('reminders', {
   isCompleted: integer('is_completed', { mode: 'boolean' }).default(false),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 });
+
+export const noteAttachments = sqliteTable('note_attachments', {
+  id: text('id').primaryKey(),
+  noteId: text('note_id').notNull().references(() => notes.id),
+  fileName: text('file_name').notNull(),
+  fileType: text('file_type').notNull(),
+  fileSize: integer('file_size').notNull(),
+  fileUrl: text('file_url').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+});

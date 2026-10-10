@@ -3,7 +3,9 @@ import { drizzle } from 'drizzle-orm/d1';
 import { tasks, taskHistory, projects } from '../db/schema';
 import { eq, and, isNull, ne, lt, sql, desc } from 'drizzle-orm';
 
-const taskRoutes = new Hono();
+import type { AppEnv } from '../index';
+
+const taskRoutes = new Hono<AppEnv>();
 
 // Generate UUID
 const genId = () => crypto.randomUUID();

@@ -4,55 +4,61 @@
   gap: 24px;
 }
 
+/* Sidebar */
 .historySidebar {
-  width: 300px;
+  width: 320px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
 }
 
 .monthSelector {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
+  padding: 24px;
   border-bottom: 1px solid var(--color-border);
 }
 
 .monthSelector h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
 }
 
 .navBtn {
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
-  border-radius: 4px;
-  padding: 4px;
+  border-radius: 6px;
+  padding: 6px;
   cursor: pointer;
   display: flex;
   color: var(--color-text);
+  transition: all var(--transition-fast);
 }
 
 .navBtn:hover {
   background: var(--color-border);
 }
 
-.loadingSidebar, .emptySidebar {
-  padding: 32px 16px;
+.emptySidebar, .loadingSidebar {
+  padding: 40px 24px;
   text-align: center;
   color: var(--color-text-light);
   font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .dayList {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -61,10 +67,10 @@
 .dayBtn {
   width: 100%;
   text-align: left;
-  background: var(--color-bg-secondary);
+  background: transparent;
   border: 1px solid var(--color-border);
-  padding: 12px;
-  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all var(--transition-fast);
   position: relative;
@@ -72,15 +78,18 @@
 }
 
 .dayBtn:hover {
-  border-color: rgba(0, 91, 150, 0.3);
-  transform: translateX(2px);
-  box-shadow: var(--shadow-sm);
+  background: var(--color-bg-secondary);
+  border-color: rgba(0, 91, 150, 0.2);
 }
 
 .dayBtnActive {
   background: rgba(0, 91, 150, 0.05);
   border-color: var(--color-primary);
   box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.dayBtnActive:hover {
+  background: rgba(0, 91, 150, 0.08);
 }
 
 .dayInfo {
@@ -98,6 +107,7 @@
 .dayStats {
   font-size: 12px;
   color: var(--color-text-light);
+  font-weight: 500;
 }
 
 .progressBar {
@@ -105,7 +115,6 @@
   background: var(--color-border);
   border-radius: 3px;
   overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .progressFill {
@@ -124,97 +133,177 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .emptyDetail, .loadingDetail {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
   color: var(--color-text-light);
-  font-style: italic;
+  gap: 16px;
+}
+
+.emptyStateIcon {
+  color: var(--color-primary);
+  opacity: 0.3;
 }
 
 .detailHeader {
   padding: 24px;
   border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.detailHeader h2 {
-  margin: 0 0 16px 0;
+.detailTitle {
+  margin: 0;
   font-size: 20px;
   font-weight: 600;
 }
 
 .headerStats {
   display: flex;
-  gap: 24px;
+  gap: 16px;
 }
 
 .headerStat {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 500;
+  background: var(--color-bg-secondary);
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
 }
 
 .detailContent {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 32px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 48px;
 }
 
-.tasksSection h3, .timelineSection h3 {
-  margin: 0 0 16px 0;
+.sectionTitle {
+  margin: 0 0 20px 0;
   font-size: 16px;
   font-weight: 600;
   color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.tasksGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 16px;
-}
-
-.taskCard {
-  padding: 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-bg-secondary);
-}
-
-.taskCard h4 {
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.taskStatus {
-  font-size: 11px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  padding: 4px 8px;
-  border-radius: 4px;
-  color: var(--color-text-light);
-}
-
-.emptyTimeline {
+.emptyText {
   color: var(--color-text-light);
   font-style: italic;
   font-size: 14px;
+  margin: 0;
 }
 
+/* Task List Rows */
+.tasksList {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.taskRow {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  gap: 16px;
+  transition: background var(--transition-fast);
+  cursor: pointer;
+  background: var(--color-bg);
+}
+
+.taskRow:last-child {
+  border-bottom: none;
+}
+
+.taskRow:hover {
+  background: var(--color-bg-secondary);
+}
+
+.checkbox {
+  color: var(--color-text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+}
+
+.checkbox:hover {
+  color: var(--color-primary);
+}
+
+.checkboxDone {
+  color: #22c55e;
+}
+
+.taskTitle {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taskProject {
+  font-size: 11px;
+  background: var(--color-bg-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--color-text-light);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--color-border);
+}
+
+.taskMeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 200px;
+  justify-content: flex-end;
+}
+
+.taskDate {
+  font-size: 12px;
+  color: var(--color-text-light);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.taskPriority {
+  font-size: 11px;
+  font-weight: 600;
+  width: 60px;
+  text-align: right;
+}
+
+/* Timeline */
 .timeline {
   display: flex;
   flex-direction: column;
   gap: 20px;
   position: relative;
-  padding-left: 12px;
+  padding-left: 16px;
 }
 
 .timeline::before {
@@ -222,9 +311,9 @@
   position: absolute;
   top: 6px;
   bottom: 0;
-  left: 16px;
+  left: 19px;
   width: 2px;
-  background: linear-gradient(to bottom, var(--color-primary), rgba(0, 91, 150, 0.2));
+  background: linear-gradient(to bottom, var(--color-primary), rgba(0, 91, 150, 0.1));
 }
 
 .timelineItem {
@@ -235,17 +324,24 @@
 }
 
 .timelineDot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   background: var(--color-primary);
   border-radius: 50%;
   margin-top: 6px;
   z-index: 1;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.8), 0 0 0 1px var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-bg), 0 0 0 1px var(--color-primary);
+  margin-left: -1px;
 }
 
 .timelineItem:first-child .timelineDot {
   animation: pulseToday 2s infinite;
+}
+
+@keyframes pulseToday {
+  0% { box-shadow: 0 0 0 4px var(--color-bg), 0 0 0 1px var(--color-primary), 0 0 0 0 rgba(0, 91, 150, 0.4); }
+  70% { box-shadow: 0 0 0 4px var(--color-bg), 0 0 0 1px var(--color-primary), 0 0 0 6px rgba(0, 91, 150, 0); }
+  100% { box-shadow: 0 0 0 4px var(--color-bg), 0 0 0 1px var(--color-primary), 0 0 0 0 rgba(0, 91, 150, 0); }
 }
 
 .timelineInfo {
@@ -253,10 +349,10 @@
   flex-direction: column;
   gap: 4px;
   background: var(--color-bg-secondary);
-  padding: 14px 16px;
+  padding: 12px 16px;
   border-radius: var(--radius-md);
   flex: 1;
-  border: 1px solid transparent;
+  border: 1px solid var(--color-border);
   transition: all var(--transition-fast);
 }
 
@@ -264,7 +360,7 @@
   background: var(--color-bg);
   border-color: rgba(0, 91, 150, 0.2);
   box-shadow: var(--shadow-sm);
-  transform: translateX(4px);
+  transform: translateX(2px);
 }
 
 .timelineTime {
@@ -274,8 +370,9 @@
 }
 
 .timelineText {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-text);
+  line-height: 1.4;
 }
 
 .timelineText em {

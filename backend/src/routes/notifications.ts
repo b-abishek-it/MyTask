@@ -1,9 +1,10 @@
+import type { AppEnv } from '../index';
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
 import { notifications } from '../db/schema';
 import { eq, desc } from 'drizzle-orm';
 
-const notificationRoutes = new Hono();
+const notificationRoutes = new Hono<AppEnv>();
 
 // GET /notifications
 notificationRoutes.get('/', async (c) => {

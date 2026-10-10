@@ -12,12 +12,22 @@ import notificationRoutes from './routes/notifications'
 import workspaceRoutes from './routes/workspaces'
 import trashRoutes from './routes/trash'
 
-type Bindings = {
+export type Bindings = {
   DB: D1Database
+  BUCKET: R2Bucket
   JWT_SECRET: string
 }
 
-const app = new Hono<{ Bindings: Bindings }>()
+export type Variables = {
+  user: any;
+}
+
+export type AppEnv = {
+  Bindings: Bindings;
+  Variables: Variables;
+}
+
+const app = new Hono<AppEnv>()
 
 app.use('*', cors({
   origin: ['http://localhost:5173'],

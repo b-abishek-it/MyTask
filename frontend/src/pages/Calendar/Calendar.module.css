@@ -297,3 +297,72 @@
 .openKanbanBtn:hover {
   background: var(--color-border);
 }
+
+.viewToggles {
+  display: flex;
+  gap: 8px;
+}
+.viewToggle {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-light);
+}
+.activeView {
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+  font-weight: 500;
+}
+.dayTasks {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  flex: 1;
+}
+.taskPill {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: grab;
+  user-select: none;
+}
+.taskPill:active {
+  cursor: grabbing;
+}
+.moreTasks {
+  font-size: 10px;
+  color: var(--color-text-light);
+  text-align: center;
+  padding: 2px;
+}
+.dayHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.quickAddBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-light);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  padding: 2px;
+  border-radius: 4px;
+}
+.day:hover .quickAddBtn {
+  opacity: 1;
+}
+.quickAddBtn:hover {
+  color: var(--color-primary);
+  background: var(--color-bg-secondary);
+}

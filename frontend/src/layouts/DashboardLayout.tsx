@@ -48,15 +48,15 @@ export const DashboardLayout = () => {
         onClose={() => setShowCommandPalette(false)} 
       />
       <aside className={`${styles.sidebar} ${sidebarCollapsed ? styles.sidebarCollapsed : ''}`}>
-        <button 
-          className={styles.sidebarToggle} 
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
-        </button>
         <div className={styles.brand}>
           <h2>MyTask</h2>
+          <button 
+            className={styles.sidebarToggle} 
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+          </button>
         </div>
         <nav className={styles.nav}>
           <div className={styles.navGroup}>

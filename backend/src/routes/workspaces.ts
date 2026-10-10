@@ -1,9 +1,10 @@
+import type { AppEnv } from '../index';
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
 import { workspaces, users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 
-const workspaceRoutes = new Hono();
+const workspaceRoutes = new Hono<AppEnv>();
 
 // GET /workspaces
 workspaceRoutes.get('/', async (c) => {

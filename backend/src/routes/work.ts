@@ -1,9 +1,10 @@
+import type { AppEnv } from '../index';
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
 import { tasks, taskHistory, projects } from '../db/schema';
 import { eq, and, isNull, sql, desc } from 'drizzle-orm';
 
-const workRoutes = new Hono();
+const workRoutes = new Hono<AppEnv>();
 
 // GET /work/summary?month=2026-09 - Summary of work days
 workRoutes.get('/summary', async (c) => {
@@ -80,6 +81,44 @@ workRoutes.get('/:date', async (c) => {
   }
 
   return c.json({ tasks: taskList, history });
+});
+
+// GET /work/dashboard - All tasks and recent global history
+workRoutes.get('/dashboard', async (c) => {
+  const db = drizzle(c.env.DB);
+  const workspaceId = c.req.query('workspace_id');
+
+  const conditions: any[] = [isNull(tasks.deletedAt)];
+  if (workspaceId) conditions.push(eq(tasks.workspaceId, workspaceId));
+
+  const allTasks = await db
+    .select({
+      id: tasks.id,
+      userId: tasks.userId,
+      workspaceId: tasks.workspaceId,
+      projectId: tasks.projectId,
+      title: tasks.title,
+      description: tasks.description,
+      status: tasks.status,
+      priority: tasks.priority,
+      taskDate: tasks.taskDate,
+      dueDate: tasks.dueDate,
+      createdAt: tasks.createdAt,
+      updatedAt: tasks.updatedAt,
+      projectName: projects.name,
+    })
+    .from(tasks)
+    .leftJoin(projects, eq(tasks.projectId, projects.id))
+    .where(and(...conditions))
+    .orderBy(desc(tasks.updatedAt));
+
+  const recentHistory = await db
+    .select()
+    .from(taskHistory)
+    .orderBy(desc(taskHistory.changedAt))
+    .limit(50);
+
+  return c.json({ tasks: allTasks, history: recentHistory });
 });
 
 export default workRoutes;

@@ -1,9 +1,10 @@
+import type { AppEnv } from '../index';
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
 import { tasks, notes, projects } from '../db/schema';
 import { sql, isNull, or } from 'drizzle-orm';
 
-const searchRoutes = new Hono();
+const searchRoutes = new Hono<AppEnv>();
 
 // GET /search?q=query&workspace_id=X
 searchRoutes.get('/', async (c) => {

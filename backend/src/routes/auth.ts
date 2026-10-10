@@ -1,3 +1,4 @@
+import type { AppEnv } from '../index';
 import { Hono } from 'hono';
 import { sign } from 'hono/jwt';
 import { setCookie, deleteCookie, getCookie } from 'hono/cookie';
@@ -5,7 +6,7 @@ import { verify } from 'hono/jwt';
 
 const JWT_SECRET = 'super-secret-hardcoded-key-for-dev';
 
-const auth = new Hono();
+const auth = new Hono<AppEnv>();
 
 auth.post('/login', async (c) => {
   const body = await c.req.json();
@@ -15,7 +16,7 @@ auth.post('/login', async (c) => {
       userId: 'user-001',
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // 24 hours
     };
-    const token = await sign(payload, c.env?.JWT_SECRET || JWT_SECRET);
+    const token = await sign(payload, c.env?.JWT_SECRET || JWT_SECRET, 'HS256');
     setCookie(c, 'auth_token', token, { httpOnly: true, sameSite: 'Strict' });
     return c.json({ success: true, message: 'Logged in successfully' });
   }
@@ -31,7 +32,7 @@ auth.get('/me', async (c) => {
   const token = getCookie(c, 'auth_token');
   if (!token) return c.json({ authenticated: false }, 401);
   try {
-    const decodedPayload = await verify(token, c.env?.JWT_SECRET || JWT_SECRET);
+    const decodedPayload = await verify(token, c.env?.JWT_SECRET || JWT_SECRET, 'HS256');
     return c.json({ authenticated: true, user: decodedPayload });
   } catch (e) {
     return c.json({ authenticated: false }, 401);

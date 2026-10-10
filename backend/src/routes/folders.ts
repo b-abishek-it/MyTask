@@ -1,9 +1,10 @@
+import type { AppEnv } from '../index';
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
 import { folders } from '../db/schema';
 import { eq, and } from 'drizzle-orm';
 
-const folderRoutes = new Hono();
+const folderRoutes = new Hono<AppEnv>();
 
 const genId = () => crypto.randomUUID();
 

@@ -83,7 +83,7 @@ export const projectsApi = {
 // ===== Calendar =====
 export const calendarApi = {
   getMonth: (month: string, workspaceId?: string) =>
-    request<{ dates: any }>('/api/calendar', { params: { month, workspace_id: workspaceId } }),
+    request<{ tasks: any[] }>('/api/calendar', { params: { month, workspace_id: workspaceId } }),
   getDate: (date: string, workspaceId?: string) =>
     request<{ tasks: any[] }>('/api/calendar', { params: { date, workspace_id: workspaceId } }),
 };
@@ -94,6 +94,8 @@ export const workApi = {
     request<{ days: any[] }>('/api/work/summary', { params: { month, workspace_id: workspaceId } }),
   getDate: (date: string, workspaceId?: string) =>
     request<{ tasks: any[]; history: any[] }>(`/api/work/${date}`, { params: { workspace_id: workspaceId } }),
+  getDashboard: (workspaceId?: string) =>
+    request<{ tasks: any[]; history: any[] }>('/api/work/dashboard', { params: { workspace_id: workspaceId } }),
 };
 
 // ===== Folders =====

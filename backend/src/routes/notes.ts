@@ -1,9 +1,10 @@
+import type { AppEnv } from '../index';
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
 import { notes } from '../db/schema';
 import { eq, and, isNull, sql, desc, or } from 'drizzle-orm';
 
-const noteRoutes = new Hono();
+const noteRoutes = new Hono<AppEnv>();
 
 const genId = () => crypto.randomUUID();
 
@@ -150,6 +151,55 @@ noteRoutes.post('/:id/duplicate', async (c) => {
 
   const [note] = await db.select().from(notes).where(eq(notes.id, newId));
   return c.json({ note }, 201);
+});
+
+// POST /notes/:id/upload
+noteRoutes.post('/:id/upload', async (c) => {
+  const db = drizzle(c.env.DB);
+  const id = c.req.param('id');
+  
+  // Verify note exists
+  const [note] = await db.select().from(notes).where(eq(notes.id, id));
+  if (!note) return c.json({ success: false, message: 'Note not found' }, 404);
+
+  const formData = await c.req.parseBody();
+  const file = formData['file'] as File;
+  
+  if (!file) return c.json({ success: false, message: 'No file uploaded' }, 400);
+
+  const fileExt = file.name.split('.').pop();
+  const fileKey = `notes/${id}/${genId()}.${fileExt}`;
+  
+  // Upload to R2 Bucket
+  await c.env.BUCKET.put(fileKey, await file.arrayBuffer(), {
+    httpMetadata: { contentType: file.type }
+  });
+
+  // Since we don't have a custom domain configured yet, we will return the R2 key.
+  // In production, this would be a public R2 domain URL.
+  const fileUrl = `/api/notes/media/${fileKey}`;
+
+  // If it's an attachment (not just an inline image), save to DB
+  if (formData['isAttachment'] === 'true') {
+    // Note: We need to import noteAttachments from schema if we do this, 
+    // but for now we just return the URL so the frontend can use it.
+  }
+
+  return c.json({ success: true, url: fileUrl, name: file.name, type: file.type });
+});
+
+// GET /notes/media/*
+noteRoutes.get('/media/*', async (c) => {
+  const key = c.req.path.replace('/api/notes/media/', '');
+  const object = await c.env.BUCKET.get(key);
+  
+  if (!object) return c.json({ message: 'Not found' }, 404);
+  
+  const headers = new Headers();
+  object.writeHttpMetadata(headers);
+  headers.set('etag', object.httpEtag);
+  
+  return new Response(object.body, { headers });
 });
 
 export default noteRoutes;

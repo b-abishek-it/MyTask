@@ -55,7 +55,7 @@
 }
 
 .sidebarCollapsed .brand {
-  padding: 24px 0;
+  padding: 20px 0;
   display: flex;
   justify-content: center;
 }
@@ -64,14 +64,7 @@
   display: none;
 }
 
-.sidebarCollapsed .sidebarToggle {
-  right: 20px;
-}
-
 .sidebarToggle {
-  position: absolute;
-  right: 14px;
-  top: 24px;
   width: 32px;
   height: 32px;
   border-radius: 6px;
@@ -83,7 +76,7 @@
   color: var(--color-text-light);
   cursor: pointer;
   transition: all var(--transition-fast);
-  z-index: 20;
+  flex-shrink: 0;
 }
 
 .sidebarToggle:hover {
@@ -92,14 +85,20 @@
 }
 
 .brand {
-  padding: 24px 60px 24px 24px;
+  padding: 20px 16px;
   color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  box-sizing: border-box;
 }
 
 .brand h2 {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.5px;
+  margin: 0;
 }
 
 .nav {
@@ -107,7 +106,7 @@
   flex-direction: column;
   justify-content: space-between;
   flex: 1;
-  padding: 0 12px 24px;
+  padding: 0 12px 16px;
 }
 
 .navGroup {
@@ -121,7 +120,7 @@
   flex-direction: column;
   gap: 4px;
   border-top: 1px solid var(--color-border);
-  padding-top: 16px;
+  padding-top: 12px;
 }
 
 .navItem {

@@ -15,6 +15,13 @@
       "when": 1791554838832,
       "tag": "0001_sturdy_leper_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791614418608,
+      "tag": "0002_soft_katie_power",
+      "breakpoints": true
     }
   ]
 }

@@ -44,7 +44,7 @@ export const Kanban = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createModalStatus, setCreateModalStatus] = useState<TaskStatus | null>(null);
   const [filterPriority, setFilterPriority] = useState<string>('');
   const [filterProject, setFilterProject] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
@@ -111,7 +111,18 @@ export const Kanban = () => {
     if (!over) return;
 
     const taskId = active.id as string;
-    const newStatus = over.id as TaskStatus;
+    let newStatus = over.id as TaskStatus;
+
+    // Check if over.id is a column or a task
+    if (newStatus !== 'TODO' && newStatus !== 'IN_PROGRESS' && newStatus !== 'IN_REVIEW' && newStatus !== 'DONE') {
+      const overTask = tasks.find((t) => t.id === over.id);
+      if (overTask) {
+        newStatus = overTask.status;
+      } else {
+        return;
+      }
+    }
+
     const task = tasks.find((t) => t.id === taskId);
 
     if (!task || task.status === newStatus) return;
@@ -153,7 +164,7 @@ export const Kanban = () => {
   };
 
   const handleTaskCreated = () => {
-    setShowCreateModal(false);
+    setCreateModalStatus(null);
     fetchTasks();
   };
 
@@ -227,7 +238,7 @@ export const Kanban = () => {
           </button>
           <button
             className={styles.createButton}
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => setCreateModalStatus('TODO')}
           >
             <Plus size={16} /> Create Task
           </button>
@@ -287,7 +298,7 @@ export const Kanban = () => {
                 id={col.id} 
                 title={col.title} 
                 count={columnTasks.length}
-                onCreateTask={col.id === 'TODO' ? () => setShowCreateModal(true) : undefined}
+                onCreateTask={() => setCreateModalStatus(col.id)}
               >
                 <SortableContext items={columnTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
                   {columnTasks.length === 0 && (
@@ -314,13 +325,14 @@ export const Kanban = () => {
         </DragOverlay>
       </DndContext>
 
-      {showCreateModal && (
+      {createModalStatus && (
         <CreateTaskModal
           projects={projects}
           workspaceId={activeWorkspace?.id || ''}
-          onClose={() => setShowCreateModal(false)}
+          onClose={() => setCreateModalStatus(null)}
           onCreated={handleTaskCreated}
           defaultDate={dateParam}
+          defaultStatus={createModalStatus}
         />
       )}
 

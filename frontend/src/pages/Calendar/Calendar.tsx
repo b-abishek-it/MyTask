@@ -1,21 +1,67 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWorkspace } from '../../features/workspace/WorkspaceContext';
-import { calendarApi, projectsApi } from '../../services/api';
-import { Task, Project, CalendarDaySummary } from '../../types';
-import { ChevronLeft, ChevronRight, Plus, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { calendarApi, projectsApi, tasksApi } from '../../services/api';
+import { Task, Project } from '../../types';
+import { ChevronLeft, ChevronRight, Plus, ExternalLink, Calendar as CalendarIcon } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { CreateTaskModal } from '../Kanban/CreateTaskModal';
+import { TaskDetailPanel } from '../Kanban/TaskDetailPanel';
+import { DndContext, useDroppable, DragEndEvent } from '@dnd-kit/core';
 import styles from './Calendar.module.css';
+
+const CalendarCell = ({ 
+  day, year, month, isSelected, isToday, tasks, onSelect, onAdd 
+}: any) => {
+  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const { setNodeRef, isOver } = useDroppable({ id: dateStr });
+
+  const doneCount = tasks?.filter((t: Task) => t.status === 'DONE').length || 0;
+  const inProgressCount = tasks?.filter((t: Task) => t.status === 'IN_PROGRESS' || t.status === 'IN_REVIEW').length || 0;
+  const todoCount = tasks?.filter((t: Task) => t.status === 'TODO').length || 0;
+  const total = tasks?.length || 0;
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${styles.day} ${isSelected ? styles.daySelected : ''} ${isToday ? styles.dayToday : ''} ${isOver ? styles.dayOver : ''}`}
+      onClick={() => onSelect(day)}
+    >
+      <div className={styles.dayHeader}>
+        <span className={styles.dayNumber}>{day}</span>
+        <button className={styles.quickAddBtn} onClick={(e) => { e.stopPropagation(); onAdd(dateStr); }}>
+          <Plus size={14} />
+        </button>
+      </div>
+      
+      {total > 0 && (
+        <div className={styles.dayIndicators}>
+          {doneCount > 0 && <span className={styles.indicatorDone} title={`${doneCount} Done`} />}
+          {inProgressCount > 0 && <span className={styles.indicatorInProgress} title={`${inProgressCount} In Progress`} />}
+          {todoCount > 0 && <span className={styles.indicatorTodo} title={`${todoCount} To Do`} />}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const CalendarPage = () => {
   const { activeWorkspace } = useWorkspace();
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [monthData, setMonthData] = useState<Record<string, CalendarDaySummary>>({});
+  const [searchParams] = useSearchParams();
+  const dateParam = searchParams.get('date');
+  
+  const initialDate = dateParam ? new Date(dateParam + 'T12:00:00') : new Date();
+  const [currentDate, setCurrentDate] = useState(initialDate);
+  const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
+  
+  const [monthTasks, setMonthTasks] = useState<Record<string, Task[]>>({});
   const [selectedTasks, setSelectedTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [, setIsLoading] = useState(true);
+  const [createModalDate, setCreateModalDate] = useState<string>('');
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  
+  const [viewType, setViewType] = useState<'month'>('month');
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -25,15 +71,18 @@ export const CalendarPage = () => {
     const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`;
     try {
       const data = await calendarApi.getMonth(monthStr, activeWorkspace.id);
-      const dataMap = data.dates?.reduce((acc: any, curr: any) => {
-        acc[curr.date] = curr;
-        return acc;
-      }, {});
-      setMonthData(dataMap || {});
+      const tasksByDate: Record<string, Task[]> = {};
+      
+      data.tasks?.forEach((task: Task) => {
+        const date = task.taskDate;
+        if (!date) return;
+        if (!tasksByDate[date]) tasksByDate[date] = [];
+        tasksByDate[date].push(task);
+      });
+      
+      setMonthTasks(tasksByDate);
     } catch (err) {
       console.error('Failed to fetch month data', err);
-    } finally {
-      setIsLoading(false);
     }
   }, [activeWorkspace, year, month]);
 
@@ -45,15 +94,13 @@ export const CalendarPage = () => {
   };
 
   const fetchSelectedDateTasks = useCallback(async () => {
-    if (!activeWorkspace) return;
     const dateStr = formatLocalDate(selectedDate);
-    try {
-      const data = await calendarApi.getDate(dateStr, activeWorkspace.id);
-      setSelectedTasks(data.tasks || []);
-    } catch (err) {
-      console.error('Failed to fetch daily tasks', err);
+    if (monthTasks[dateStr]) {
+      setSelectedTasks(monthTasks[dateStr]);
+    } else {
+      setSelectedTasks([]);
     }
-  }, [activeWorkspace, selectedDate]);
+  }, [selectedDate, monthTasks]);
 
   useEffect(() => {
     fetchMonthData();
@@ -84,6 +131,40 @@ export const CalendarPage = () => {
     setSelectedDate(new Date(year, month, day));
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const taskId = active.id as string;
+    const newDate = over.id as string;
+    const task = active.data.current?.task as Task;
+
+    if (!task || task.taskDate === newDate) return;
+
+    // Optimistic update
+    setMonthTasks(prev => {
+      const next = { ...prev };
+      if (task.taskDate && next[task.taskDate]) {
+        next[task.taskDate] = next[task.taskDate].filter(t => t.id !== taskId);
+      }
+      if (!next[newDate]) next[newDate] = [];
+      next[newDate] = [...next[newDate], { ...task, taskDate: newDate }];
+      return next;
+    });
+
+    try {
+      await tasksApi.update(taskId, { ...task, taskDate: newDate });
+    } catch (err) {
+      console.error('Failed to update task date', err);
+      fetchMonthData();
+    }
+  };
+
+  const openQuickCreate = (dateStr: string) => {
+    setCreateModalDate(dateStr);
+    setShowCreateModal(true);
+  };
+
   const selectedDateStr = formatLocalDate(selectedDate);
 
   return (
@@ -97,52 +178,57 @@ export const CalendarPage = () => {
             </h2>
             <button onClick={nextMonth} className={styles.navBtn}><ChevronRight size={20} /></button>
           </div>
-        </div>
-
-        <div className={styles.gridContainer}>
-          <div className={styles.weekdays}>
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-              <div key={d} className={styles.weekday}>{d}</div>
-            ))}
-          </div>
-
-          <div className={styles.daysGrid}>
-            {Array.from({ length: firstDay }).map((_, i) => (
-              <div key={`empty-${i}`} className={styles.emptyDay} />
-            ))}
-            
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const day = i + 1;
-              const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-              const dayData = monthData[dateStr];
-              const isSelected = selectedDate.getDate() === day && selectedDate.getMonth() === month && selectedDate.getFullYear() === year;
-              const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
-
-              return (
-                <div
-                  key={day}
-                  className={`${styles.day} ${isSelected ? styles.daySelected : ''} ${isToday ? styles.dayToday : ''}`}
-                  onClick={() => handleDateClick(day)}
-                >
-                  <span className={styles.dayNumber}>{day}</span>
-                  {dayData && dayData.total > 0 && (
-                    <div className={styles.dayIndicators}>
-                      {dayData.done > 0 && <span className={styles.indicatorDone} title={`${dayData.done} Done`} />}
-                      {dayData.inProgress > 0 && <span className={styles.indicatorInProgress} title={`${dayData.inProgress} In Progress`} />}
-                      {dayData.todo > 0 && <span className={styles.indicatorTodo} title={`${dayData.todo} To Do`} />}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+          
+          <div className={styles.viewToggles}>
+            <button className={`${styles.viewToggle} ${viewType === 'month' ? styles.activeView : ''}`} onClick={() => setViewType('month')}>
+              <CalendarIcon size={16} /> Month
+            </button>
           </div>
         </div>
+
+        <DndContext onDragEnd={handleDragEnd}>
+          <div className={styles.gridContainer}>
+            <div className={styles.weekdays}>
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                <div key={d} className={styles.weekday}>{d}</div>
+              ))}
+            </div>
+
+            <div className={styles.daysGrid}>
+              {Array.from({ length: firstDay }).map((_, i) => (
+                <div key={`empty-${i}`} className={styles.emptyDay} />
+              ))}
+              
+              {Array.from({ length: daysInMonth }).map((_, i) => {
+                const day = i + 1;
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const tasks = monthTasks[dateStr] || [];
+                const isSelected = selectedDate.getDate() === day && selectedDate.getMonth() === month && selectedDate.getFullYear() === year;
+                const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
+
+                return (
+                  <CalendarCell
+                    key={day}
+                    day={day}
+                    year={year}
+                    month={month}
+                    isSelected={isSelected}
+                    isToday={isToday}
+                    tasks={tasks}
+                    onSelect={handleDateClick}
+                    onAdd={openQuickCreate}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </DndContext>
       </div>
 
       <div className={styles.sidePanel}>
         <div className={styles.sideHeader}>
           <h3>{selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</h3>
-          <button className={styles.addBtn} onClick={() => setShowCreateModal(true)}>
+          <button className={styles.addBtn} onClick={() => openQuickCreate(selectedDateStr)}>
             <Plus size={16} /> Add Task
           </button>
         </div>
@@ -153,7 +239,7 @@ export const CalendarPage = () => {
           ) : (
             <ul className={styles.taskList}>
               {selectedTasks.map(task => (
-                <li key={task.id} className={styles.taskItem}>
+                <li key={task.id} className={styles.taskItem} onClick={() => setActiveTask(task)}>
                   <div className={styles.taskHeader}>
                     <span className={styles.taskTitle}>{task.title}</span>
                     <span className={styles.taskStatus}>{task.status.replace('_', ' ')}</span>
@@ -179,12 +265,27 @@ export const CalendarPage = () => {
           onClose={() => setShowCreateModal(false)}
           onCreated={() => {
             setShowCreateModal(false);
-            fetchSelectedDateTasks();
             fetchMonthData();
           }}
-          defaultDate={selectedDateStr}
+          defaultDate={createModalDate}
+        />
+      )}
+
+      {activeTask && (
+        <TaskDetailPanel
+          task={activeTask}
+          projects={projects}
+          onClose={() => setActiveTask(null)}
+          onUpdated={() => {
+            setActiveTask(null);
+            fetchMonthData();
+          }}
+          onDeleted={() => {
+            setActiveTask(null);
+            fetchMonthData();
+          }}
         />
       )}
     </div>
   );
-};
+}
