@@ -87,10 +87,8 @@ jobs:
         run: npm run build
 
       - name: Deploy Frontend to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: mytask-frontend # Change this to your Cloudflare Pages project name
-          directory: ./frontend/dist
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          command: pages deploy ./frontend/dist --project-name=mytask-frontend
