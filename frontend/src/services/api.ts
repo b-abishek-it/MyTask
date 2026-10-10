@@ -1,4 +1,6 @@
-const API_BASE = 'http://localhost:8787';
+export const API_BASE = import.meta.env.PROD 
+  ? 'https://mytask-backend.babishek-tech.workers.dev' 
+  : 'http://localhost:8787';
 
 interface RequestOptions {
   method?: string;

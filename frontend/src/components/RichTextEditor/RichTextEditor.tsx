@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import styles from './RichTextEditor.module.css';
+import { API_BASE } from '../../services/api';
 
 import { Node, mergeAttributes } from '@tiptap/core';
 
@@ -113,13 +114,13 @@ const MenuBar = ({ editor }: { editor: any }) => {
     formData.append('file', file);
     
     try {
-      const res = await fetch(`http://localhost:8787/api/notes/${editor.options.editorProps.attributes?.['data-note-id'] || 'temp'}/upload`, {
+      const res = await fetch(`${API_BASE}/api/notes/${editor.options.editorProps.attributes?.['data-note-id'] || 'temp'}/upload`, {
         method: 'POST',
         body: formData,
       });
       const data = await res.json();
       if (data.url) {
-        const fullUrl = `http://localhost:8787${data.url}`;
+        const fullUrl = `${API_BASE}${data.url}`;
         if (type === 'image') editor.chain().focus().setImage({ src: fullUrl }).run();
         else editor.chain().focus().setVideo({ src: fullUrl }).run();
       }

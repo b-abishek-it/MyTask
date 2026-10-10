@@ -30,7 +30,7 @@ export type AppEnv = {
 const app = new Hono<AppEnv>()
 
 app.use('*', cors({
-  origin: ['http://localhost:5173'],
+  origin: ['http://localhost:5173', 'https://mytask-frontend.pages.dev'],
   credentials: true
 }))
 
